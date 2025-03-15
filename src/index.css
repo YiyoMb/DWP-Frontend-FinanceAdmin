@@ -1,3 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Courgette&family=Madimi+One&family=Raleway:ital,wght@0,100..900;1,100..900&family=Sora:wght@100..800&display=swap');
+@import './styles/variables.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+body {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    font-family: var(--font-family);
+}
