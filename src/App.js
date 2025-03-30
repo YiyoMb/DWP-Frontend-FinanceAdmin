@@ -6,6 +6,8 @@ import Goals from "./pages/Goals/Goals";
 import Budget from "./pages/Budget/Budget";
 import Train from "./pages/Train/Train";
 import Forum from "./pages/Forum/Forum";
+import ForgotPassword from "./pages/Auth/Components/ForgotPassword"
+import ResetPassword from "./pages/Auth/Components/ResetPassword"
 import './index.css';
 
 function App() {
@@ -19,6 +21,8 @@ function App() {
             <Route path="/budget" element={<Budget />} />
             <Route path="/train" element={<Train />} />
             <Route path="/forum" element={<Forum />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
         </Routes>
       </Router>
   );

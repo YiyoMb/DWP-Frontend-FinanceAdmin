@@ -1,17 +1,16 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 
-export default function RegisterForm() {
-    const [fullName, setFullName] = useState("");
-    const [email, setEmail] = useState("");
+const ResetPassword = () => {
+    const { token } = useParams();
+    const navigate = useNavigate();
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [notification, setNotification] = useState({ show: false, type: "", message: "" });
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [passwordStrength, setPasswordStrength] = useState(0);
-    const navigate = useNavigate();
 
     // Mostrar notificación al usuario
     const showNotification = (type, message) => {
@@ -39,52 +38,45 @@ export default function RegisterForm() {
         evaluatePasswordStrength(newPassword);
     };
 
-    const handleRegister = async (event) => {
-        event.preventDefault();
-        setIsLoading(true);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
 
         // Verificar si las contraseñas coinciden
         if (password !== confirmPassword) {
             showNotification("error", "Las contraseñas no coinciden.");
-            setIsLoading(false);
+            setLoading(false);
             return;
         }
 
         // Verificar fortaleza de la contraseña
         if (passwordStrength < 3) {
             showNotification("warning", "Tu contraseña no es lo suficientemente segura. Intenta incluir letras mayúsculas, números y caracteres especiales.");
-            setIsLoading(false);
+            setLoading(false);
             return;
         }
 
         try {
-            // Realizar la petición POST al backend para registrar al usuario
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/register`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/reset-password/${token}`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ fullName, email, password }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password }),
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                // Si el registro es exitoso, redirige a la página de login
-                showNotification("success", "Registro exitoso. Por favor, inicia sesión.");
-                setTimeout(() => {
-                    navigate("/");
-                }, 2000);
+                showNotification("success", data.message || "Contraseña restablecida correctamente.");
+                setTimeout(() => navigate("/"), 2000);
             } else {
-                // Si hay algún error, muestra el mensaje
-                showNotification("error", data.message || "Hubo un error en el registro.");
+                showNotification("error", data.message || "Error al restablecer la contraseña.");
             }
         } catch (error) {
-            console.error("Error en el registro:", error);
+            console.error("Error al restablecer la contraseña:", error);
             showNotification("error", "Hubo un problema al conectar con el servidor. Intenta nuevamente más tarde.");
-        } finally {
-            setIsLoading(false);
         }
+
+        setLoading(false);
     };
 
     return (
@@ -131,55 +123,14 @@ export default function RegisterForm() {
                 {/* Contenedor del formulario */}
                 <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-100">
                     <div className="text-center mb-8">
-                        <h2 className="text-3xl font-bold text-gray-800">Crear cuenta</h2>
-                        <p className="mt-2 text-sm text-gray-600">Completa tus datos para registrarte</p>
+                        <h2 className="text-3xl font-bold text-gray-800">Restablecer contraseña</h2>
+                        <p className="mt-2 text-sm text-gray-600">Ingresa tu nueva contraseña</p>
                     </div>
 
-                    <form onSubmit={handleRegister} className="space-y-5">
-                        {/* Nombre completo */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Nombre completo</label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                                    </svg>
-                                </div>
-                                <input
-                                    type="text"
-                                    className="w-full pl-10 pr-3 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150"
-                                    placeholder="Tu nombre"
-                                    value={fullName}
-                                    onChange={(e) => setFullName(e.target.value)}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        {/* Correo electrónico */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                                    </svg>
-                                </div>
-                                <input
-                                    type="email"
-                                    className="w-full pl-10 pr-3 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-150"
-                                    placeholder="tucorreo@ejemplo.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                />
-                            </div>
-                        </div>
-
+                    <form onSubmit={handleSubmit} className="space-y-5">
                         {/* Contraseña */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Nueva contraseña</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -282,38 +233,14 @@ export default function RegisterForm() {
                             )}
                         </div>
 
-                        {/* Términos y condiciones (opcional) */}
-                        <div className="flex items-start">
-                            <div className="flex items-center h-5">
-                                <input
-                                    id="terms"
-                                    type="checkbox"
-                                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                                    required
-                                />
-                            </div>
-                            <div className="ml-3 text-sm">
-                                <label htmlFor="terms" className="text-gray-600">
-                                    Acepto los{" "}
-                                    <a href="#" className="text-primary hover:text-primary-dark font-medium">
-                                        términos y condiciones
-                                    </a>
-                                    {" "}y la{" "}
-                                    <a href="#" className="text-primary hover:text-primary-dark font-medium">
-                                        política de privacidad
-                                    </a>
-                                </label>
-                            </div>
-                        </div>
-
-                        {/* Botón de registro */}
+                        {/* Botón de restablecer */}
                         <button
                             type="submit"
-                            disabled={isLoading}
+                            disabled={loading}
                             className={`w-full flex justify-center py-3 px-4 rounded-lg text-white font-medium transition duration-150
-                            ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary'}`}
+                            ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary'}`}
                         >
-                            {isLoading ? (
+                            {loading ? (
                                 <>
                                     <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -322,7 +249,7 @@ export default function RegisterForm() {
                                     Procesando...
                                 </>
                             ) : (
-                                "Registrarse"
+                                "Restablecer Contraseña"
                             )}
                         </button>
                     </form>
@@ -330,8 +257,8 @@ export default function RegisterForm() {
                     {/* Enlace para volver al login */}
                     <div className="mt-8 text-center">
                         <p className="text-sm text-gray-600">
-                            ¿Ya tienes una cuenta?{" "}
-                            <Link to="/login" className="text-primary font-semibold hover:underline">
+                            ¿Recordaste tu contraseña?{" "}
+                            <Link to="/" className="text-primary font-semibold hover:underline">
                                 Inicia sesión aquí
                             </Link>
                         </p>
@@ -340,4 +267,6 @@ export default function RegisterForm() {
             </div>
         </div>
     );
-}
+};
+
+export default ResetPassword;
