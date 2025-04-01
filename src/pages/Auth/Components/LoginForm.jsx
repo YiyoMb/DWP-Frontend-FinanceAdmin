@@ -32,7 +32,7 @@ export default function LoginForm() {
 
             if (data.token) {
                 // Si hay token, autenticación sin MFA → Redirigir al dashboard
-                localStorage.setItem("authToken", data.token);
+                localStorage.setItem("token", data.token);
                 showNotification("success", "Inicio de sesión exitoso");
                 setTimeout(() => navigate("/dashboard"), 1000);
             } else if (data.mfaRequired) {
