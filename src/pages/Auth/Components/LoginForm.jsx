@@ -28,9 +28,10 @@ export default function LoginForm() {
                 body: JSON.stringify({ email, password }),
             });
 
-            const data = await response.json();
+            //const data = await response.json();
 
-            if (data.token) {
+            if (response.ok) {
+                const data = await response.json();
                 // Si hay token, autenticación sin MFA → Redirigir al dashboard
                 localStorage.setItem("token", data.token);
                 showNotification("success", "Inicio de sesión exitoso");

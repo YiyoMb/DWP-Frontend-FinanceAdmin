@@ -67,7 +67,7 @@ export default function RegisterForm() {
                 body: JSON.stringify({ fullName, email, password }),
             });
 
-            const data = await response.json();
+            //const data = await response.json();
 
             if (response.ok) {
                 // Si el registro es exitoso, redirige a la página de login
@@ -76,6 +76,7 @@ export default function RegisterForm() {
                     navigate("/");
                 }, 2000);
             } else {
+                const data = await response.json();
                 // Si hay algún error, muestra el mensaje
                 showNotification("error", data.message || "Hubo un error en el registro.");
             }
