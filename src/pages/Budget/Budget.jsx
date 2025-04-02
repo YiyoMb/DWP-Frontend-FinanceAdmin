@@ -10,6 +10,8 @@ const Budget = () => {
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [transactionToDelete, setTransactionToDelete] = useState(null);
 
     // Función para cargar las transacciones desde el backend con fetch
     const fetchTransactions = useCallback(async () => {
@@ -47,13 +49,25 @@ const Budget = () => {
         setTransactions(prevTransactions => [newTransaction, ...prevTransactions]);
     };
 
-    // Manejar la eliminación de una transacción
-    const handleDeleteTransaction = async (id) => {
-        if (window.confirm('¿Estás seguro de que deseas eliminar esta transacción?')) {
+    // Mostrar modal de confirmación antes de eliminar
+    const handleShowDeleteModal = (id) => {
+        setTransactionToDelete(id);
+        setShowDeleteModal(true);
+    };
+
+    // Cancelar la eliminación
+    const handleCancelDelete = () => {
+        setShowDeleteModal(false);
+        setTransactionToDelete(null);
+    };
+
+    // Confirmar y proceder con la eliminación
+    const handleConfirmDelete = async () => {
+        if (transactionToDelete) {
             try {
                 const token = localStorage.getItem('token');
 
-                const response = await fetch(`${process.env.REACT_APP_API_URL}/transactions/${id}`, {
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/transactions/${transactionToDelete}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -64,14 +78,55 @@ const Budget = () => {
                     throw new Error("Error al eliminar la transacción");
                 }
                 setTransactions(prevTransactions =>
-                    prevTransactions.filter(transaction => transaction._id !== id)
+                    prevTransactions.filter(transaction => transaction._id !== transactionToDelete)
                 );
-                alert('Transacción eliminada correctamente');
+                setError(null);
+                setShowDeleteModal(false);
+                setTransactionToDelete(null);
             } catch (err) {
                 console.error("Error al eliminar la transacción:", err);
-                alert('Error al eliminar la transacción');
+                setError("Error al eliminar la transacción. Por favor, intenta de nuevo.");
+                setShowDeleteModal(false);
+                setTransactionToDelete(null);
             }
         }
+    };
+
+    // Componente de modal integrado en el mismo archivo
+    const DeleteConfirmationModal = () => {
+        return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center">
+                {/* Overlay oscuro */}
+                <div className="fixed inset-0 bg-black opacity-50"></div>
+
+                {/* Contenido del modal */}
+                <div className="bg-white rounded-lg p-6 shadow-xl z-10 max-w-md w-full mx-4">
+                    <div className="flex flex-col">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                            Confirmar eliminación
+                        </h3>
+                        <p className="text-gray-700 mb-6">
+                            ¿Estás seguro de que deseas eliminar esta transacción? Esta acción no se puede deshacer.
+                        </p>
+
+                        <div className="flex justify-end space-x-4">
+                            <button
+                                onClick={handleCancelDelete}
+                                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleConfirmDelete}
+                                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                            >
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
     };
 
     return (
@@ -119,11 +174,14 @@ const Budget = () => {
                 <div className="mt-6">
                     <TransactionList
                         transactions={transactions}
-                        onDelete={handleDeleteTransaction}
+                        onDelete={handleShowDeleteModal}
                         loading={loading}
                     />
                 </div>
             </main>
+
+            {/* Modal de confirmación de eliminación */}
+            {showDeleteModal && <DeleteConfirmationModal />}
 
             {/* Footer */}
             <Footer />

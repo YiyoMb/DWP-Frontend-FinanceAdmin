@@ -6,13 +6,19 @@ import Footer from "../../layouts/Footer";
 const Dashboard = () => {
     return (
         <div className="flex flex-col min-h-screen bg-[#f5f5f8]">
-            {/* Header y Navbar en la misma fila */}
-            <div className="flex items-center bg-[#f5f5f8] py-8 px-6">
+            {/* Contenedor del Header y Navbar */}
+            <div className="w-full bg-[#f5f5f8] py-4 px-6">
                 <div className="container mx-auto flex items-center justify-between">
-                    <Header />
+                    {/* Nombre de la app */}
+                    <h1 className="text-xl font-bold text-[#17211f]">FinanzApp</h1>
+
+                    {/* Navbar centrado ocupando el espacio disponible */}
                     <div className="flex-grow flex justify-center">
                         <Navbar />
                     </div>
+
+                    {/* Botón de cerrar sesión alineado a la derecha */}
+                    <Header />
                 </div>
             </div>
 
