@@ -331,7 +331,7 @@ export default function RegisterForm() {
                     <div className="mt-8 text-center">
                         <p className="text-sm text-gray-600">
                             ¿Ya tienes una cuenta?{" "}
-                            <Link to="/login" className="text-primary font-semibold hover:underline">
+                            <Link to="/" className="text-primary font-semibold hover:underline">
                                 Inicia sesión aquí
                             </Link>
                         </p>
