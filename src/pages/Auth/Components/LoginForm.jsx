@@ -36,10 +36,6 @@ export default function LoginForm() {
                 localStorage.setItem("token", data.token);
                 showNotification("success", "Inicio de sesión exitoso");
                 setTimeout(() => navigate("/dashboard"), 1000);
-            } else if (data.mfaRequired) {
-                // Si MFA está activado, guardar email temporalmente y redirigir a la verificación MFA
-                localStorage.setItem("tempEmail", email);
-                navigate("/verify-mfa");
             } else {
                 // Si no hay token, muestra un mensaje de error
                 showNotification("error", "Credenciales inválidas. Por favor, verifica tu correo y contraseña.");
