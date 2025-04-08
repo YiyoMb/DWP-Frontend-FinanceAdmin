@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import MFAVerification from "./MFAVerification";
 
 export default function LoginForm() {
     const navigate = useNavigate();
@@ -8,6 +9,7 @@ export default function LoginForm() {
     const [isLoading, setIsLoading] = useState(false);
     const [notification, setNotification] = useState({ show: false, type: "", message: "" });
     const [showPassword, setShowPassword] = useState(false);
+    const [showMFAVerification, setShowMFAVerification] = useState(false);
 
     const showNotification = (type, message) => {
         setNotification({ show: true, type, message });
@@ -32,13 +34,21 @@ export default function LoginForm() {
 
             if (response.ok) {
                 const data = await response.json();
-                // Si hay token, autenticación sin MFA → Redirigir al dashboard
-                localStorage.setItem("token", data.token);
-                showNotification("success", "Inicio de sesión exitoso");
-                setTimeout(() => navigate("/dashboard"), 1000);
+
+                if (data.mfaRequired) {
+                    // Usuario tiene MFA habilitado → Mostrar verificación
+                    setShowMFAVerification(true);
+                    showNotification("info", "Por favor, ingresa el código de tu aplicación de autenticación");
+                } else {
+                    // Usuario sin MFA → Guardar token y redirigir
+                    localStorage.setItem("token", data.token);
+                    showNotification("success", "Inicio de sesión exitoso");
+                    setTimeout(() => navigate("/dashboard"), 1000);
+                }
             } else {
+                const data = await response.json();
                 // Si no hay token, muestra un mensaje de error
-                showNotification("error", "Credenciales inválidas. Por favor, verifica tu correo y contraseña.");
+                showNotification("error", data.message || "Credenciales inválidas. Por favor, verifica tu correo y contraseña.");
             }
         } catch (error) {
             console.error("Error en el inicio de sesión:", error);
@@ -47,6 +57,11 @@ export default function LoginForm() {
             setIsLoading(false);
         }
     };
+
+    // Si se está mostrando la pantalla de verificación MFA, renderiza ese componente
+    if (showMFAVerification) {
+        return <MFAVerification email={email} />;
+    }
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 text-primary font-sora">
@@ -57,7 +72,8 @@ export default function LoginForm() {
                         className={`mb-4 p-4 rounded-md flex items-center justify-between
                         ${notification.type === "error" ? "bg-red-50 text-red-700 border border-red-200" :
                             notification.type === "success" ? "bg-green-50 text-green-700 border border-green-200" :
-                                "bg-blue-50 text-blue-700 border border-blue-200"}`}
+                                notification.type === "info" ? "bg-blue-50 text-blue-700 border border-blue-200" :
+                                    "bg-blue-50 text-blue-700 border border-blue-200"}`}
                     >
                         <div className="flex items-center">
                             {notification.type === "error" && (
@@ -68,6 +84,11 @@ export default function LoginForm() {
                             {notification.type === "success" && (
                                 <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                            )}
+                            {notification.type === "info" && (
+                                <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             )}
                             <span>{notification.message}</span>

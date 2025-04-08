@@ -17,6 +17,9 @@ const Navbar = () => {
                 <li>
                     <Link to="/forum" className="hover:text-gray-600">Forum</Link>
                 </li>
+                <li>
+                    <Link to="/setup-mfa" className="hover:text-gray-600">Verification</Link>
+                </li>
             </ul>
         </nav>
     );

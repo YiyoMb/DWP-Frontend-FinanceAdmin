@@ -8,6 +8,7 @@ import Train from "./pages/Train/Train";
 import Forum from "./pages/Forum/Forum";
 import ForgotPassword from "./pages/Auth/Components/ForgotPassword"
 import ResetPassword from "./pages/Auth/Components/ResetPassword"
+import MFASetup from "./pages/Auth/Components/MFASetup";
 import './index.css';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
             <Route path="/forum" element={<Forum />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
+            <Route path="/setup-mfa" element={<MFASetup />} />
         </Routes>
       </Router>
   );
