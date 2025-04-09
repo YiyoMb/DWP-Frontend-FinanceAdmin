@@ -22,7 +22,7 @@ export default function MFASetup() {
             try {
                 const token = localStorage.getItem("token");
                 if (!token) {
-                    navigate("/login");
+                    navigate("/");
                     return;
                 }
 
